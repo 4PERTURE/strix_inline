@@ -1,0 +1,1 @@
+#define WIREGUARD_VERSION "0.0.20190208-daily-99f8e6439"
