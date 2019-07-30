@@ -4068,7 +4068,7 @@ int set_tddi_lockdown_data_lansi(unsigned char *lockdown_data, unsigned short le
 	int retval = -EINVAL;
 	unsigned long checksum;
 	unsigned char checksum_array[4];
-	unsigned short blk_cnt;
+	unsigned short blk_cnt = 0;
 	struct synaptics_rmi4_data *rmi4_data = fwu->rmi4_data;
 
 	if (fwu->bl_version != BL_V6) {
