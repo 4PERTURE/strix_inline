@@ -1783,8 +1783,9 @@ static inline long qcedev_ioctl(struct file *file,
 				handle->sha_ctxt.diglen);
 		mutex_unlock(&hash_access_lock);
 		if (copy_to_user((void __user *)arg, &qcedev_areq.sha_op_req,
-					sizeof(struct qcedev_sha_op_req)))
+					sizeof(struct qcedev_sha_op_req))) {
 			return -EFAULT;
+			}
 		}
 		break;
 
@@ -1863,8 +1864,9 @@ static inline long qcedev_ioctl(struct file *file,
 				handle->sha_ctxt.diglen);
 		mutex_unlock(&hash_access_lock);
 		if (copy_to_user((void __user *)arg, &qcedev_areq.sha_op_req,
-					sizeof(struct qcedev_sha_op_req)))
+					sizeof(struct qcedev_sha_op_req))) {
 			return -EFAULT;
+			}
 		}
 		break;
 
