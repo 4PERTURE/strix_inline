@@ -2597,17 +2597,41 @@ return retval;
 #ifdef F54_POLLING_GET_REPORT
 static ssize_t test_sysfs_get_report_polling(void)
 {
-int retval = 0;
-unsigned char report_index[2];
-unsigned int byte_delay_us;
-struct synaptics_rmi4_data *rmi4_data = f54->rmi4_data;
+	int retval = 0;
+	unsigned char report_index[2];
+	unsigned int byte_delay_us = 0;
+	struct synaptics_rmi4_data *rmi4_data = f54->rmi4_data;
 
-retval = test_wait_for_command_completion();
-if (retval < 0) {
-	retval = -EIO;
-	f54->status = STATUS_ERROR;
-	return retval;
-}
+	retval = test_wait_for_command_completion ();
+	if (retval < 0) {
+		retval = -EIO;
+		f54->status = STATUS_ERROR;
+		return retval;
+	}
+
+	test_set_report_size ();
+	if (f54->report_size == 0) {
+		dev_err (rmi4_data->pdev->dev.parent,
+				"%s: Report data size = 0\n", __func__);
+		retval = -EIO;
+		f54->status = STATUS_ERROR;
+		return retval;
+	}
+
+	if (f54->data_buffer_size < f54->report_size) {
+		if (f54->data_buffer_size)
+			kfree (f54->report_data);
+		f54->report_data = kzalloc (f54->report_size, GFP_KERNEL);
+		if (!f54->report_data) {
+			dev_err (rmi4_data->pdev->dev.parent,
+					"%s: Failed to alloc mem for data buffer\n", __func__);
+			f54->data_buffer_size = 0;
+			retval = -EIO;
+			f54->status = STATUS_ERROR;
+			return retval;
+		}
+		f54->data_buffer_size = f54->report_size;
+	}
 
 test_set_report_size();
 if (f54->report_size == 0) {
@@ -3041,17 +3065,17 @@ extern struct synaptics_rmi4_data *rmi4_data;
 static ssize_t test_sysfs_read_report_show(struct device *dev,
 	struct device_attribute *attr, char *buf)
 {
-unsigned int ii;
-unsigned int jj;
-int cnt;
-int count = 0;
-int tx_num = f54->tx_assigned;
-int rx_num = f54->rx_assigned;
-char *report_data_8;
-short *report_data_16;
-int *report_data_32;
-unsigned short *report_data_u16;
-unsigned int *report_data_u32;
+	unsigned int ii;
+	unsigned int jj;
+	int cnt;
+	int count = 0;
+	int tx_num = f54->tx_assigned;
+	int rx_num = f54->rx_assigned;
+	char *report_data_8;
+	short *report_data_16 = 0;
+	int *report_data_32;
+	unsigned short *report_data_u16;
+	unsigned int *report_data_u32;
 
 #ifdef SYNAPTICS_ESD_CHECK
 	printk("%s SYNAPTICS_ESD_CHECK is off\n",__func__);
@@ -5128,7 +5152,7 @@ static void test_report_work(struct work_struct *work)
 {
 	int retval;
 	unsigned char report_index[2];
-	unsigned int byte_delay_us;
+	unsigned int byte_delay_us = 0;
 	struct synaptics_rmi4_data *rmi4_data = f54->rmi4_data;
 
 	mutex_lock(&f54->status_mutex);
