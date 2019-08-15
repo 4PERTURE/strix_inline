@@ -325,7 +325,6 @@ static int do_read_inode(struct inode *inode)
 	else if (S_ISREG(inode->i_mode))
 		fi->i_gc_failures[GC_FAILURE_PIN] =
 					le16_to_cpu(ri->i_gc_failures);
-		fi->i_gc_failures = le16_to_cpu(ri->i_gc_failures);
 	fi->i_xattr_nid = le32_to_cpu(ri->i_xattr_nid);
 	fi->i_flags = le32_to_cpu(ri->i_flags);
 	fi->flags = 0;
