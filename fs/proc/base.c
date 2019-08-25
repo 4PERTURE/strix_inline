@@ -1239,6 +1239,7 @@ static ssize_t oom_score_adj_write(struct file *file, const char __user *buf,
 	char buffer[PROC_NUMBUF];
 	int oom_score_adj;
 	int err;
+	unsigned long *flags;
 
 	memset(buffer, 0, sizeof(buffer));
 	if (count > sizeof(buffer) - 1)
