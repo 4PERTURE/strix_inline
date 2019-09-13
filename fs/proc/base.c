@@ -97,18 +97,6 @@
 
 #include "../../lib/kstrtox.h"
 
-static struct task_struct *task_to_kill;
-
-static void proc_kill_task(struct work_struct *work)
-{
-	struct task_struct *task = task_to_kill;
-
-	send_sig(SIGKILL, task, 0);
-	put_task_struct(task);
-}
-
-static DECLARE_WORK(task_kill_work, proc_kill_task);
-
 /* NOTE:
  *	Implementing inode permission operations in /proc is almost
  *	certainly an error.  Permission checks need to happen during
@@ -1235,7 +1223,6 @@ static ssize_t oom_score_adj_read(struct file *file, char __user *buf,
 static ssize_t oom_score_adj_write(struct file *file, const char __user *buf,
 					size_t count, loff_t *ppos)
 {
-	struct task_struct *task;
 	char buffer[PROC_NUMBUF];
 	int oom_score_adj;
 	int err;
@@ -1259,20 +1246,6 @@ static ssize_t oom_score_adj_write(struct file *file, const char __user *buf,
 	}
 
 	err = __set_oom_adj(file, oom_score_adj, false);
-	task = get_proc_task(file_inode(file));
-
-	/* These apps burn through CPU in the background. Don't let them. */
-	if (oom_score_adj >= 700) {
-		if (!strcmp(task->comm, "id.GoogleCamera") ||
-		    !strcmp(task->comm, "ndroid.settings")) {
-			if (task != task_to_kill)
-				flush_work(&task_kill_work);
-			task_to_kill = task;
-			get_task_struct(task);
-			schedule_work(&task_kill_work);
-		}
-	}
-
 out:
 	return err < 0 ? err : count;
 }
