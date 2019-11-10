@@ -2222,6 +2222,7 @@ CONFIG_QPNP_SMBCHARGER=y
 # CONFIG_QPNP_TYPEC is not set
 CONFIG_QPNP_QG=y
 # CONFIG_SMB1390_CHARGE_PUMP is not set
+CONFIG_FORCE_FAST_CHARGE=y
 
 #
 # Miscellaneous Qualcomm Technologies, Inc. power support
